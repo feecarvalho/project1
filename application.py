@@ -40,7 +40,7 @@ def register():
         pass1 = request.form.get("pass1")
         pass2 = request.form.get("pass2")
         if pass1 != pass2 or pass1 is None or pass2 is None:
-            message = "Password doesn't match"
+            message = "Your password doesn't match"
             return render_template("register.html", message=message)
         usr = db.execute("SELECT username FROM accounts WHERE username = :username", {"username": username}).fetchall()
         if usr != []:
