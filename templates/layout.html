@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
         <title>FLY8 - Booking has never been so easy!</title>
+        <link rel="stylesheet" href="/workspace/project1/static/style.css">
     </head>
     <body>
         <nav>
             <div class="nav-logo">
                 <a href="{{ url_for('index') }}">
-                    <img src="https://bulma.io/images/bulma-logo.png" alt="Fly8 Logo" width="120" height="30">
+                    <img src="https://github.com/feecarvalho/project1/blob/master/content/logo_project.png?raw=true" alt="Fly8 Logo" width="240" height="70">
                 </a>
         </nav>
         <h1>{% block heading %}{% endblock %}</h1>
 
         {% block body %}
+
         {% endblock %}
     </body>
 </html>

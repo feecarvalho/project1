@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block heading %}
+    Register to start booking your Fly8!
+{% endblock %}
+
+{% block body %}
+
+{{ message }}
+    <form action="{{ url_for('register') }}" method="POST">
+        <input type="text" name="username" placeholder="Enter your username">
+        <input type="password" name="pass1" placeholder="Create a password">
+        <input type="password" name="pass2" placeholder="Repeate your password">
+        <button>Register!</button>
+{% endblock %}

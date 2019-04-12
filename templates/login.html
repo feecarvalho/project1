@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block heading %}
+    Login now to Book your flight!
+{% endblock %}
+
+{% block body %}
+    <form action="{{ url_for('login') }}" method="POST">
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <button>Login</button>
+
+    <h2>Or Create an Free Account by clicking <a href="{{ url_for('register') }}">here</a>!</h2>
+{% endblock %}
