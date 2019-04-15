@@ -1,10 +1,12 @@
 body {
     margin: 0px;
     padding: 0px;
+    font-family: 'Montserrat', sans-serif;
 }
 
 nav {
-    background-color: #1d2459;
+    background-color: #ccc5b9;
+    height: 10vh;
 }
 
 .nav-logo {

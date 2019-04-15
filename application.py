@@ -7,6 +7,10 @@ import os
 import hashlib
 import requests
 
+# Set up database
+engine = create_engine(os.getenv("DATABASE_URL"))
+db = scoped_session(sessionmaker(bind=engine))
+
 # API Goodreads
 res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "wstERZo4jV9Or7FSG2sIQ", "isbns": "9781632168146"})
 print(res.json())
@@ -22,10 +26,6 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Set up database
-engine = create_engine(os.getenv("DATABASE_URL"))
-db = scoped_session(sessionmaker(bind=engine))
-
 
 @app.route("/")
 def index():
@@ -40,21 +40,31 @@ def register():
         pass1 = request.form.get("pass1")
         pass2 = request.form.get("pass2")
         if pass1 != pass2 or pass1 is None or pass2 is None:
-            message = "Your password doesn't match"
+            message = "Your password is invalid or doesn't match".upper()
             return render_template("register.html", message=message)
-        usr = db.execute("SELECT username FROM accounts WHERE username = :username", {"username": username}).fetchall()
-        if usr != []:
-            message = "Username already in use"
-            return redirect(url_for('register'))
         password = pass1
+        usr = db.execute("SELECT username FROM accounts WHERE username = :username", {"username": username}).fetchone()
+        if usr != None:
+            message = "Username already in use".upper()
+            return render_template('register.html', message=message)
         db.execute("INSERT INTO accounts (username, password) VALUES (:username, :password)", {"username": username, "password": password})
         db.commit()
-    return render_template("register.html")
+    message = "New account created successfully!"
+    return render_template("register.html", message=message)
 
 
-@app.route("/login")
+@app.route("/login", methods=['POST', 'GET'])
 def login():
-    return render_template("login.html")
+    message = None
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        connection = db.execute("SELECT * FROM accounts WHERE username = :username AND password = :password", {"username": username, "password": password}).fetchall()
+        if connection[0] == username and connection[1] == password:
+            message = "Login successfull"
+            return render_template("index.html", message=message)
+    message = "Username or password incorrect!"
+    return render_template("login.html", message=message)
 
 
 @app.route("/logout")
