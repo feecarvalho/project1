@@ -29,12 +29,18 @@ Session(app)
 
 @app.route("/")
 def index():
-    return render_template("index.html", )
+    if session.get('logged_in'):
+        return render_template("index.html", status="loggedin")
+    else:
+        return render_template("index.html")
 
 
 @app.route("/register", methods=['POST', 'GET'])
 def register():
-    message = None
+    message = ""
+    if session.get('logged_in'):
+        session['logged_in'] = True
+        return render_template("index.html", message="You are already registered!")
     if request.method == "POST":
         username = request.form.get("username")
         pass1 = request.form.get("pass1")
@@ -49,24 +55,31 @@ def register():
             return render_template('register.html', message=message)
         db.execute("INSERT INTO accounts (username, password) VALUES (:username, :password)", {"username": username, "password": password})
         db.commit()
-    message = "New account created successfully!"
+        message = "New account created successfully! Please login to start using SNK Bookstore!"
+        return render_template("login.html", message=message)
     return render_template("register.html", message=message)
 
 
 @app.route("/login", methods=['POST', 'GET'])
 def login():
     message = None
+    if session.get('logged_in'):
+        session['logged_in'] = True
+        return render_template("index.html", message="You already logged in!")
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        connection = db.execute("SELECT * FROM accounts WHERE username = :username AND password = :password", {"username": username, "password": password}).fetchall()
-        if connection[0] == username and connection[1] == password:
+        connection = db.execute("SELECT * FROM accounts WHERE username = :username AND password = :password", {"username": username, "password": password}).fetchone()
+        if connection is not None:
             message = "Login successfull"
-            return render_template("index.html", message=message)
-    message = "Username or password incorrect!"
-    return render_template("login.html", message=message)
+            session['logged_in'] = True
+            session['username'] = username
+            return render_template("index.html", message=message, status="loggedin")
+    return render_template("login.html", message="Username or password incorrect!", status="loggedout")
 
 
 @app.route("/logout")
 def logout():
-    return render_template("logout.html")
+    session['logged_in'] = False
+    session['username'] = ''
+    return render_template("logout.html", status="loggedout")

@@ -1,11 +1,15 @@
 {% extends "layout.html" %}
 
 {% block heading %}
-    Welcome to sNk Bookstore!
+    {% if session['username'] != None %}
+        Hello, {{session['username']}} welcome to sNk Bookstore!
+    {% else %}
+        Hello, welcome to sNk Bookstore!
+    {% endif %}
 {% endblock %}
 
 {% block body %}
-{{ message }}
+    {{ message }}
     <p>Mussum Ipsum, cacilds vidis litro abertis. Suco de cevadiss deixa as pessoas mais interessantis.
         Quem num gosta di mim que vai caçá sua turmis! Per aumento de cachacis, eu reclamis. Mais vale um bebadis conhecidiss, que um alcoolatra anonimis. Mussum Ipsum, cacilds vidis litro abertis. Suco de cevadiss deixa as pessoas mais interessantis.
         Quem num gosta di mim que vai caçá sua turmis! Per aumento de cachacis, eu reclamis. Mais vale um bebadis conhecidiss, que um alcoolatra anonimis. Mussum Ipsum, cacilds vidis litro abertis. Suco de cevadiss deixa as pessoas mais interessantis.
@@ -22,8 +26,8 @@
         Quem num gosta di mim que vai caçá sua turmis! Per aumento de cachacis, eu reclamis. Mais vale um bebadis conhecidiss, que um alcoolatra anonimis</p>
 
 
-    {% if not connection %}
-    <h2><a href="{{ url_for('login') }}">Login</a> or <a href="{{ url_for('register') }}">Register</a> to check our books colleciton!</h2>
+    {% if not session['logged_in'] %}
+    <h2><a href="{{ url_for('login') }}">Login</a> or <a href="{{ url_for('register') }}">Register</a> to check our books collection!</h2>
     {% endif %}
 {% endblock %}
 

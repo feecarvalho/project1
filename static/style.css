@@ -5,10 +5,10 @@ body {
 }
 
 nav {
-    background-color: #ccc5b9;
-    height: 10vh;
+    background-color: #a19100;
 }
 
 .nav-logo {
-
+    display: inline-block;
+    height: 120px;
 }
