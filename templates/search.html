@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+
+{% block heading %}
+Search for your favourite book!!!
+{% endblock %}
+
+{% block body %}
+    <form action="{{ url_for('search') }}" method="POST">
+        <div class="form-group">
+            <label for="SearchType">Search by:</label>
+            <select class="form-control" name="book_tags" id="SearchType">
+                    <option value="isbn">ISBN</option>
+                    <option value="title">Title</option>
+                    <option value="author">Author</option>
+                    <option value="year">Year</option>
+            </select>
+            <input type="text" name="search_value" placeholder="Type your search here...">
+            <button>Search</button>
+        </div>
+    {{ message }}
+
+{% endblock %}

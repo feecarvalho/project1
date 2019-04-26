@@ -15,12 +15,13 @@
                 <ul class="nav-menu">
                     <li><a href="{{ url_for('index') }}">Home</a></li>
                     <li><a href="{{ url_for('register') }}">Register</a></li>
-                    <li><a href="#">Search</a></li>
                     {% if status == "loggedin" or session['logged_in'] %}
+                    <li><a href="{{ url_for('search') }}">Search</a></li>
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
                     {% else %}
                     <li><a href="{{ url_for('login') }}">Login</a></li>
                     {% endif %}
+                    
                 </ul>
             </div>
         </nav>
