@@ -8,8 +8,8 @@
     </head>
     <body>
         <nav>
-            <div class="nav-logo">
-                <a href="{{ url_for('index') }}">
+            <div>
+                <a href="{{ url_for('index') }}" class="nav-logo">
                     <img src="/static/snk_logo.png" alt="snk-bookstore">
                 </a>
                 <ul class="nav-menu">
@@ -21,7 +21,7 @@
                     {% else %}
                     <li><a href="{{ url_for('login') }}">Login</a></li>
                     {% endif %}
-                    
+
                 </ul>
             </div>
         </nav>

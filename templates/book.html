@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block heading %}
+
+{% endblock %}
+
+{% block body %}
+    {{ message }}
+    {% if not book %}
+        No results found.
+    {% endif %}
+    {% for info in book %}
+    <ul class="booklist">
+        <li>Title: <a href="">{{info.title}}</a></li>
+        <li>ISBN: {{info.isbn}}</li>
+        <li>Author: {{info.author}}</li>
+        <li>Year: {{info.year}}</li>
+    </ul>
+    {% endfor %}
+{% endblock %}

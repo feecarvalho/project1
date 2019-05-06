@@ -75,10 +75,12 @@ def login():
         if connection is not None:
             message = "Login successfull"
             session['logged_in'] = True
-            #session["username"] = db.execute("SELECT first_name FROM accounts WHERE username = :username", {"username": username}).fetchone()
-            session["username"] = db.execute("SELECT first_name FROM accounts WHERE username = :username", {"username": 'fee'}).fetchone()
+            show_name = db.execute("SELECT first_name FROM accounts WHERE username = :username", {"username": username}).fetchone()
+            session['username'] = str(show_name[0])
             return render_template("index.html", message=message, status="loggedin")
-    return render_template("login.html", message="Username or password incorrect!", status="loggedout")
+        else:
+            return render_template("login.html", message="Username or password incorrect!", status="loggedout")
+    return render_template("login.html", status="loggedout")
 
 
 @app.route("/logout")
@@ -90,11 +92,16 @@ def logout():
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
+    message = None
     if request.method == 'GET':
-        search_input = str(request.form.get("search_value"))
-        search_type = request.form.get("book_tags")
-        if search_input == '':
-            message = "No results found."
-        else:
-            s = db.execute("SELECT * FROM books WHERE isbn LIKE :search_input", {"search_input": "%" + search_input + "%"}).fetchall()
-            return render_template("search.html", s=s)
+        return render_template('search.html')
+    if not session['logged_in']:
+        message='Please login first!'
+        return render_template('book.html', message=message)
+    if request.method == 'POST':
+        book_info = request.form.get('search_value')
+        info_type = request.form.get('book_tags')
+        sql = """SELECT * FROM books WHERE {} LIKE '%{}%' ORDER BY title ASC""".format(info_type, book_info)
+        book = db.execute(sql).fetchall()
+        book = [{'isbn': isbn, 'title': title, 'author': author, 'year': year} for isbn, title, author, year in book]
+        return render_template('book.html', book=book)
