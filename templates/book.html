@@ -6,15 +6,15 @@
 
 {% block body %}
     {{ message }}
-    {% if not book %}
-        No results found.
-    {% endif %}
-    {% for info in book %}
+    {% for book in books_result %}
+        {% if not books_result %}
+            No results found.
+        {% endif %}
     <ul class="booklist">
-        <li>Title: <a href="">{{info.title}}</a></li>
-        <li>ISBN: {{info.isbn}}</li>
-        <li>Author: {{info.author}}</li>
-        <li>Year: {{info.year}}</li>
+        <li>Title: <a href="">{{book.title}}</a></li>
+        <li>ISBN: {{book.isbn}}</li>
+        <li>Author: {{book.author}}</li>
+        <li>Year: {{book.year}}</li>
     </ul>
     {% endfor %}
 {% endblock %}

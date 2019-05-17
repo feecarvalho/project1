@@ -1,4 +1,4 @@
-from flask import Flask, session, render_template, request, redirect, url_for, flash
+from flask import Flask, session, render_template, request, redirect, url_for
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -9,13 +9,12 @@ import requests
 app = Flask(__name__)
 #app.config['DATABASE_URL'] = 'postgres://teykjyfsvqcamv:f982273d2058ffd4fccc4eba198ca702ac67ee7f42ff26f11c8653ba41f5cbcd@ec2-54-197-239-115.compute-1.amazonaws.com:5432/d1rcjij2006gm5'
 
-# Set up database
+# Set Alchemy up database
 engine = create_engine('postgres://teykjyfsvqcamv:f982273d2058ffd4fccc4eba198ca702ac67ee7f42ff26f11c8653ba41f5cbcd@ec2-54-197-239-115.compute-1.amazonaws.com:5432/d1rcjij2006gm5')
 db = scoped_session(sessionmaker(bind=engine))
 
 # API Goodreads
 res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "wstERZo4jV9Or7FSG2sIQ", "isbns": "9781632168146"})
-print(res.json())
 
 '''# Check for environment variable
 if not os.getenv("DATABASE_URL"):
@@ -25,7 +24,6 @@ if not os.getenv("DATABASE_URL"):
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-
 
 @app.route("/")
 def index():
@@ -39,7 +37,7 @@ def index():
 def register():
     message = ""
     if session.get('logged_in'):
-        session['logged_in'] = True
+        # session['logged_in'] = True
         return render_template("index.html", message="You are already registered!")
     if request.method == "POST":
         username = request.form.get("username")
@@ -48,14 +46,16 @@ def register():
         pass1 = request.form.get("pass1")
         pass2 = request.form.get("pass2")
         if pass1 != pass2 or pass1 is None or pass2 is None:
-            message = "Your password is invalid or doesn't match".upper()
+            message = "Your password is invalid or doesn't match"
             return render_template("register.html", message=message)
-        password = pass1
+        else:
+            password = pass1
         usr = db.execute("SELECT username FROM accounts WHERE username = :username", {"username": username}).fetchone()
         if usr != None:
-            message = "Username already in use".upper()
+            message = "Username already in use"
             return render_template('register.html', message=message)
-        db.execute("INSERT INTO accounts (username, password, first_name, last_name) VALUES (:username, :password, :firstname, :lastname)", {"username": username, "password": password, "firstname": firstname, "lastname": lastname})
+        else:
+            db.execute("INSERT INTO accounts (username, password, first_name, last_name) VALUES (:username, :password, :firstname, :lastname)", {"username": username, "password": password, "firstname": firstname, "lastname": lastname})
         db.commit()
         message = "New account created successfully! Please login to start using SNK Bookstore!"
         return render_template("login.html", message=message)
@@ -93,15 +93,22 @@ def logout():
 @app.route("/search", methods=['GET', 'POST'])
 def search():
     message = None
-    if request.method == 'GET':
-        return render_template('search.html')
     if not session['logged_in']:
         message='Please login first!'
         return render_template('book.html', message=message)
     if request.method == 'POST':
-        book_info = request.form.get('search_value')
         info_type = request.form.get('book_tags')
-        sql = """SELECT * FROM books WHERE {} LIKE '%{}%' ORDER BY title ASC""".format(info_type, book_info)
-        book = db.execute(sql).fetchall()
-        book = [{'isbn': isbn, 'title': title, 'author': author, 'year': year} for isbn, title, author, year in book]
-        return render_template('book.html', book=book)
+        book_info = request.form.get('search_value').lower()
+
+        if info_type != 'year':
+            sql = f"""SELECT * FROM books WHERE LOWER({info_type}) LIKE '%{book_info}%' ORDER BY title ASC"""
+        elif info_type == 'year' and type(book_info) == int:
+            sql = f"""SELECT * FROM books WHERE {info_type} = {book_info} ORDER BY title ASC"""
+
+        if db.execute(sql).rowcount == 0:
+            message = 'No results found!'
+            return render_template('book.html', message=message)
+        else:
+            books_result = db.execute(sql).fetchall()
+            return render_template('book.html', books_result=books_result)
+    return render_template('search.html')
