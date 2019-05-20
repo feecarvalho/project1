@@ -112,3 +112,8 @@ def search():
             books_result = db.execute(sql).fetchall()
             return render_template('book.html', books_result=books_result)
     return render_template('search.html')
+
+@app.route('/book/<string:isbn_id>')
+def isbn(isbn_id):
+    sel_book = db.execute("SELECT * FROM books WHERE isbn = :isbn", {'isbn': isbn_id}).fetchone()
+    return render_template('book.html', sel_book=sel_book)

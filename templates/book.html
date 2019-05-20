@@ -10,11 +10,32 @@
         {% if not books_result %}
             No results found.
         {% endif %}
-    <ul class="booklist">
-        <li>Title: <a href="">{{book.title}}</a></li>
-        <li>ISBN: {{book.isbn}}</li>
-        <li>Author: {{book.author}}</li>
-        <li>Year: {{book.year}}</li>
-    </ul>
+        <ul class="booklist">
+            <li>Title: <a href="{{ url_for('isbn', isbn_id=book.isbn) }}">{{book.title}}</a></li>
+            <li>ISBN: {{book.isbn}}</li>
+            <li>Author: {{book.author}}</li>
+            <li>Year: {{book.year}}</li>
+        </ul>
     {% endfor %}
+    {% if sel_book %}
+        <ul class="info_titles">
+            <li>ISBN:</li>
+            <li>Title:</li>
+            <li>Author:</li>
+            <li>Year:</li>
+        </ul>
+
+        <ul class="book_info">
+            {% for info in sel_book %}
+                <li>{{ info }}</li>
+            {% endfor %}
+        </ul>
+        <div class="rating-box">
+            <a class="ion-icon star1"></a>
+            <a class="ion-icon star2"></a>
+            <a class="ion-icon star3"></a>
+            <a class="ion-icon star4"></a>
+            <a class="ion-icon star5"></a>
+        </div>
+    {% endif %}
 {% endblock %}
