@@ -75,9 +75,9 @@ def login():
         if connection is not None:
             message = "Login successfull"
             session['logged_in'] = True
-            show_name = db.execute("SELECT first_name FROM accounts WHERE username = :username", {"username": username}).fetchone()
+            show_name = db.execute("SELECT id, first_name FROM accounts WHERE username = :username", {"username": username}).fetchone()
             session['username'] = str(show_name[0])
-            return render_template("index.html", message=message, status="loggedin")
+            return render_template("index.html", message=message, status="loggedin", show_name=show_name[1])
         else:
             return render_template("login.html", message="Username or password incorrect!", status="loggedout")
     return render_template("login.html", status="loggedout")
@@ -116,4 +116,19 @@ def search():
 @app.route('/book/<string:isbn_id>')
 def isbn(isbn_id):
     sel_book = db.execute("SELECT * FROM books WHERE isbn = :isbn", {'isbn': isbn_id}).fetchone()
-    return render_template('book.html', sel_book=sel_book)
+    review_list = db.execute("SELECT rating, review, user_id FROM reviews WHERE book_isbn = :book_isbn", {"book_isbn": isbn_id}).fetchall()
+    return render_template('book.html', sel_book=sel_book, review_list=review_list)
+
+@app.route('/review/<string:isbn_id>', methods=["POST"])
+def review(isbn_id):
+    review = request.form.get('comment')
+    book_isbn = isbn_id
+    rating = request.form.get('star').split('/')
+    rating = float(rating[0])
+    user_id = session['username']
+    if request.method == "POST" and review != "":
+        db.execute("INSERT INTO reviews (book_isbn, rating, review, user_id) VALUES (:book_isbn, :rating, :review, :user_id)", {"book_isbn": book_isbn, "rating": rating, "review": review, "user_id": user_id})
+        db.commit()
+        message = 'Review submited successfully!'
+        return render_template('review.html', message=message, isbn_id=isbn_id)
+    return render_template('book.html')

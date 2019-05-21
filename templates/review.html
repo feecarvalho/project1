@@ -1,0 +1,12 @@
+{% extends 'layout.html'%}
+
+{% block heading %}
+
+{% endblock %}
+
+{% block body %}
+{{ message }}
+
+<a href="{{ url_for('isbn', isbn_id=isbn_id) }}">Go back</a>
+{% endblock %}
+
