@@ -15,7 +15,9 @@ nav {
 
 .nav-menu {
     text-transform: uppercase;
+    list-style: none;
 }
+
 
 @import url(https://fonts.googleapis.com/css?family=Roboto:500,100,300,700,400);
 div.stars{

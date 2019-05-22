@@ -13,13 +13,6 @@ app = Flask(__name__)
 engine = create_engine('postgres://teykjyfsvqcamv:f982273d2058ffd4fccc4eba198ca702ac67ee7f42ff26f11c8653ba41f5cbcd@ec2-54-197-239-115.compute-1.amazonaws.com:5432/d1rcjij2006gm5')
 db = scoped_session(sessionmaker(bind=engine))
 
-# API Goodreads
-res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "wstERZo4jV9Or7FSG2sIQ", "isbns": "9781632168146"})
-
-'''# Check for environment variable
-if not os.getenv("DATABASE_URL"):
-    raise RuntimeError("DATABASE_URL is not set")
-'''
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -28,6 +21,8 @@ Session(app)
 @app.route("/")
 def index():
     if session.get('logged_in'):
+        show_name = db.execute("SELECT first_name FROM accounts WHERE id = :id", {"id": session['username']}).fetchone()
+        session['displayname'] = str(show_name[0])
         return render_template("index.html", status="loggedin")
     else:
         return render_template("index.html")
@@ -76,8 +71,9 @@ def login():
             message = "Login successfull"
             session['logged_in'] = True
             show_name = db.execute("SELECT id, first_name FROM accounts WHERE username = :username", {"username": username}).fetchone()
+            session['displayname'] = str(show_name[1])
             session['username'] = str(show_name[0])
-            return render_template("index.html", message=message, status="loggedin", show_name=show_name[1])
+            return render_template("index.html", message=message, status="loggedin")
         else:
             return render_template("login.html", message="Username or password incorrect!", status="loggedout")
     return render_template("login.html", status="loggedout")
@@ -102,7 +98,7 @@ def search():
 
         if info_type != 'year':
             sql = f"""SELECT * FROM books WHERE LOWER({info_type}) LIKE '%{book_info}%' ORDER BY title ASC"""
-        elif info_type == 'year' and type(book_info) == int:
+        elif info_type == 'year':
             sql = f"""SELECT * FROM books WHERE {info_type} = {book_info} ORDER BY title ASC"""
 
         if db.execute(sql).rowcount == 0:
@@ -116,8 +112,12 @@ def search():
 @app.route('/book/<string:isbn_id>')
 def isbn(isbn_id):
     sel_book = db.execute("SELECT * FROM books WHERE isbn = :isbn", {'isbn': isbn_id}).fetchone()
-    review_list = db.execute("SELECT rating, review, user_id FROM reviews WHERE book_isbn = :book_isbn", {"book_isbn": isbn_id}).fetchall()
-    return render_template('book.html', sel_book=sel_book, review_list=review_list)
+    user_id = session['username']
+    review_list = db.execute("SELECT rating, review, first_name, last_name FROM reviews INNER JOIN accounts ON accounts.id = user_id AND book_isbn = :isbn_id", {"isbn_id": isbn_id}).fetchall()
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "wstERZo4jV9Or7FSG2sIQ", "isbns": sel_book['isbn']})
+    if res is not None:
+        print(res.json())
+    return render_template('book.html', sel_book=sel_book, review_list=review_list, res=res)
 
 @app.route('/review/<string:isbn_id>', methods=["POST"])
 def review(isbn_id):
@@ -132,3 +132,16 @@ def review(isbn_id):
         message = 'Review submited successfully!'
         return render_template('review.html', message=message, isbn_id=isbn_id)
     return render_template('book.html')
+
+@app.route('/api/<isbn>')
+def api(isbn):
+    if db.execute("SELECT * FROM books WHERE isbn = :isbn", {"isbn": isbn}).rowcount == 0:
+        return render_template('error.html', message="404 ERROR!")
+    isbn_found = db.execute("SELECT * FROM books WHERE isbn = :isbn", {"isbn": isbn}).fetchone()
+    review_count = db.execute("SELECT rating FROM reviews WHERE book_isbn = :isbn", {"isbn": isbn_found.isbn}).rowcount
+    average_rating = db.execute("SELECT AVG(rating) FROM reviews WHERE book_isbn = :isbn", {"isbn": isbn_found.isbn}).fetchone()
+    if average_rating == float:
+        average_rating = float(average_rating[0])
+    else:
+        average_rating = 0
+    return render_template('api.html', isbn_found=isbn_found, review_count=review_count, average_rating=average_rating)

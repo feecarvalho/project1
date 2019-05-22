@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block heading %}
+
+{% endblock %}
+{% block body %}
+{
+    <p>"title: {{ isbn_found.title}}",</p>
+    <p>"author: {{ isbn_found.author}}",</p>
+    <p>"year: {{ isbn_found.year}}",</p>
+    <p>"isbn: {{ isbn_found.isbn}}",</p>
+    <p>"review_count: {{ review_count }}",</p>
+
+    <p>"average_score: {{ '%0.2f' % average_rating }}</p>
+
+}
+{% endblock %}
