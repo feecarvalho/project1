@@ -1,10 +1,10 @@
 from flask import Flask, request, render_template, jsonify, session
 from models import *
-from flask_session import Session
+# from flask_session import Session
 from sqlalchemy import create_engine, and_
-from sqlalchemy.orm import scoped_session, sessionmaker
-import os
-import hashlib
+# from sqlalchemy.orm import scoped_session, sessionmaker
+# import os
+# import hashlib
 import requests
 
 app = Flask(__name__)
