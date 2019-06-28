@@ -6,6 +6,7 @@
 
 {% block body %}
     {{ message }}
+
     {% for book in books_result %}
         {% if not books_result %}
             No results found.
@@ -17,26 +18,25 @@
             <li>Year: {{book.year}}</li>
         </ul>
     {% endfor %}
+
     {% if sel_book %}
+
+        {% for book in sel_book %}
         <ul class="info_titles">
-            <li>ISBN:</li>
-            <li>Title:</li>
-            <li>Author:</li>
-            <li>Year:</li>
+            <li>ISBN: {{ book.isbn }}</li>
+            <li>Title: {{ book.title }}</li>
+            <li>Author: {{ book.author }}</li>
+            <li>Year: {{ book.year }}</li>
         </ul>
 
-        <ul class="book_info">
-            {% for info in sel_book %}
-                <li>{{ info }}</li>
-            {% endfor %}
-        </ul>
+
         {% if res %}
             Goodreads avaliation:
-            {{ res.average_rating }}
+            {{ res }}
         {% endif %}
 
             <div class="stars">
-                <form action="{{ url_for('review', isbn_id = sel_book[0]) }}" id="comment-box" method="POST">
+                <form action="{{ url_for('review', isbn_id = book.isbn) }}" id="comment-box" method="POST">
                     <spam>Rate this book!</spam>
                     <input class="star star-1" id="star-1" type="radio" name="star" value='5'>
                     <label class="star star-1" for="star-1"></label>
@@ -52,17 +52,15 @@
                     <button>Submit review!</button>
                 </form>
             </div>
+        {% endfor %}
     {% endif %}
 
-    {% if res %}
-        {{ res.average_rating }}
-    {% endif %}
     {% if review_list %}
         {% for review in review_list %}
             <div class="review-infos">
-                <p>Rating: {{ review.rating}}</p>
-                <p>Comment: {{review.review}} </p>
-                <p>Author: {{review.first_name}} {{review.last_name}}</p>
+                <p>Rating: {{ review[0].rating}}</p>
+                <p>Comment: {{review[0].review}} </p>
+                <p>Author: {{review[1].first_name}} {{review[1].last_name}}</p>
             </div>
         {% endfor %}
     {% endif %}

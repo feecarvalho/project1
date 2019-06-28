@@ -3,8 +3,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-db= SQLAlchemy()
-
+db = SQLAlchemy()
 
 class Book(db.Model):
     __tablename__ = 'books'
@@ -12,7 +11,7 @@ class Book(db.Model):
     title = db.Column(db.String, nullable=False)
     author = db.Column(db.String, nullable=False)
     year = db.Column(db.Integer, nullable=False)
-
+    reviews = db.relationship("Review", backref="book", lazy=True)
 
 class Account(db.Model):
     __tablename__ = 'accounts'
@@ -21,17 +20,13 @@ class Account(db.Model):
     password = db.Column(db.String, nullable=False)
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)
-
-    def add_account(username, password, first_name, last_name):
-        a = Account(username=username, password=password, first_name=first_name, last_name=last_name)
-        db.session.add(a)
-        db.session.commit()
+    reviews = db.relationship("Review", backref="account", lazy=True)
 
 
 class Review(db.Model):
     __tablename__ = 'reviews'
     review_id = db.Column(db.Integer, primary_key=True)
-    book_isbn = db.Column(db.Integer, db.ForeignKey('books.isbn'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('accounts'), nullable=False)
+    book_isbn = db.Column(db.String, db.ForeignKey('books.isbn'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
     rating = db.Column(db.Numeric, nullable=False)
     review = db.Column(db.String(300), nullable=False)
